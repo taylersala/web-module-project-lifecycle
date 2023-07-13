@@ -23,11 +23,11 @@ setAxiosResponseError = (err) => this.setState({ ...this.state, error: err.respo
 postNewTodo = () => {
   axios.post(URL, { name: this.state.todoNameInput })
   .then(res => {
-    this.fetchAllTodos(
+  this.setState({ ...this.state, todos: this.state.todos.concat(res.data.data) })
     this.resetForm()
-    )
   })
-  .catch(this.setAxiosResponseError)
+  .catch(this.setAxiosResponseError) 
+
 }
 
 onTodoFormSubmit = evt => {
@@ -43,7 +43,17 @@ fetchAllTodos = () => {
     .catch(this.setAxiosResponseError)
 }
 
-
+toggleCompleted = id => () => {
+  axios.patch(`${URL}/${id}`)
+  .then(res => {
+    this.setState({ 
+      ...this.state, todos: this.state.todos.map(td => {
+        if (td.id !== id) return td
+        return res.data.data
+      })})
+  })
+  .catch(this.setAxiosResponseError)
+}
 
   componentDidMount() {
     //FETCH All todos from server
@@ -58,7 +68,7 @@ fetchAllTodos = () => {
           <h2>Todos:</h2>
           {
             this.state.todos.map(td => {
-              return <div key={td.id}>{td.name}</div>
+              return <div onClick={this.toggleCompleted(td.id)} key={td.id}>{td.name} {td.completed ? ' ✔️': ''}</div>
             })
           }
         </div>
